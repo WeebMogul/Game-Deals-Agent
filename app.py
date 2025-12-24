@@ -85,8 +85,6 @@ def send_message(message, agent_url, agent_name):
 
     with st.chat_message("assistant"):
 
-        # final_text_placeholder = st.empty()
-
         with requests.post(
             full_url, headers=headers, json=payload, stream=False
         ) as response:
@@ -96,70 +94,11 @@ def send_message(message, agent_url, agent_name):
             for data in event_data:
                 if "content" in data and data["content"].get("parts"):
                     for part in data["content"]["parts"]:
-                        # print(part)
                         if "text" in part:
 
                             final_response_text = part["text"]
-                            # print(part["text"])
 
-            # print(final_response_text)
             st.write(final_response_text)
-
-            # text_data = event_data[0]["content"]["parts"][0]["text"]
-
-            # st.write(text_data)
-
-        #         for chunk in response.iter_content(chunk_size=None):
-        #             if not chunk:
-        #                 continue
-        #             try:
-        #                 lines = chunk.decode("utf-8").splitlines()
-        #                 for line in lines:
-        #                     # print(line)
-        #                     if not line.startswith("data:"):
-        #                         continue
-
-        #                     json_data = line[len("data:") :].strip()
-        #                     if not json_data:
-        #                         continue
-
-        #                     event = json.loads(json_data)
-        #                     logging.log(msg=event, level=1)
-
-        #                     if "content" in event and event["content"].get("parts"):
-        #                         for part in event["content"]["parts"]:
-        #                             if "text" in part and part["text"] != "":
-        #                                 text_content = part["text"]
-
-        #                                 is_partial = event.get("partial", True)
-
-        #                                 if is_partial:
-        #                                     final_response_text += text_content
-        #                                 else:
-        #                                     final_response_text = text_content
-
-        #                                 # final_text_placeholder.markdown(
-        #                                 #     final_response_text + "Hello"
-        #                                 # )
-
-        #             except json.JSONDecodeError as e:
-        #                 print(f"Could not decode JSON: {line} - Error: {e}")
-        #             except Exception as e:
-        #                 print(f"Error processing chunk: {e}")
-
-        #     if final_response_text:
-        #         final_text_placeholder.markdown(final_response_text)
-        #     else:
-        #         final_text_placeholder.markdown("*Response completed*")
-
-        # except requests.exceptions.RequestException as e:
-        #     error_message = f"Error connecting to agent: {e}"
-        #     final_text_placeholder.error(error_message)
-        #     final_response_text = error_message
-        # except Exception as e:
-        #     error_message = f"An unexpected error occurred: {e}"
-        #     final_text_placeholder.error(error_message)
-        #     final_response_text = error_message
 
     st.session_state.messages.append(
         {"role": "assistant", "content": final_response_text}
