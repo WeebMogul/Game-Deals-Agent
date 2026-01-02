@@ -53,6 +53,7 @@ def get_deals_on_game(gameID: str) -> dict:
         game_data = data["deals"]
 
         game_deal_detail = []
+
         for detail in game_data:
             game_deal_detail.append(
                 {
@@ -63,6 +64,7 @@ def get_deals_on_game(gameID: str) -> dict:
                     "store_link": f"https://www.cheapshark.com/redirect?dealID={detail["dealID"]}",
                 }
             )
+        print(game_deal_detail)
 
     except Exception:
         print("broken")
@@ -73,7 +75,7 @@ def get_deals_on_game(gameID: str) -> dict:
 def get_game_info(game: str) -> dict:
     """Returns information about a game"""
 
-    url = f"https://www.cheapshark.com/api/1.0/games?title={game}&limit=5&exact=0"
+    url = f"https://www.cheapshark.com/api/1.0/games?title={game}&limit=2&exact=0"
     result = requests.get(url)
 
     try:
