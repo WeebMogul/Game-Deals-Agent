@@ -7,6 +7,13 @@ import time
 import logging
 
 
+def resp_generator(text):
+
+    for word in text.split():
+        yield word + " "
+        time.sleep(0.05)
+
+
 def send_message(message, agent_url, agent_name):
     """
     Sends a message to the agent and renders the response in a structured, streaming way.
@@ -26,28 +33,52 @@ def send_message(message, agent_url, agent_name):
         "userId": st.session_state.user_id,
         "sessionId": st.session_state.session_id,
         "newMessage": {"role": "user", "parts": [{"text": message}]},
+        "streaming": "true",
     }
     headers = {"Content-Type": "application/json"}
-    full_url = f"{agent_url}/run"
+    full_url = f"{agent_url}/run_sse"
 
     final_response_text = ""
-
     with st.chat_message("assistant"):
 
         with requests.post(
-            full_url, headers=headers, json=payload, stream=False
+            full_url, headers=headers, json=payload, stream=True
         ) as response:
+            response.raise_for_status()
+            # event_data = json.loads(response.content)
 
-            event_data = json.loads(response.content)
+            for chunk in response.iter_content(chunk_size=None):
+                lines = chunk.decode("utf-8").splitlines()
 
-            for data in event_data:
-                if "content" in data and data["content"].get("parts"):
-                    for part in data["content"]["parts"]:
-                        if "text" in part:
+                for line in lines:
+                    if not line.startswith("data"):
+                        continue
+                    json_data = line[len("data:") :].strip()
 
-                            final_response_text = part["text"]
+                    event = json.loads(json_data)
+                    print(event)
+                    print("\n\n\n\n")
 
-            st.write(final_response_text)
+                    if "content" in event and event["content"].get("parts"):
+                        if event.get("partial", True):
+                            final_response_text += event["content"]["parts"][0]["text"]
+                        else:
+                            final_response_text = event["content"]["parts"][0]["text"]
+                            break
+                        # final_placeholder_text.markdown(final_response_text)
+        print(final_response_text)
+        st.markdown(final_response_text)
+
+        # final_placeholder_text.markdown(final_response_text)
+
+        # for data in event_data:
+        #     if "content" in data and data["content"].get("parts"):
+        #         for part in data["content"]["parts"]:
+        #             if "text" in part:
+
+        #                 final_response_text = part["text"]
+
+        # st.write(final_response_text)
 
     st.session_state.messages.append(
         {"role": "assistant", "content": final_response_text}
@@ -96,7 +127,7 @@ if "session_id" not in st.session_state:
 
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
+        st.write(msg["content"])
 
 if st.session_state.session_id:
     if user_input := st.chat_input(
