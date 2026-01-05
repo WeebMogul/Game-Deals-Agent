@@ -80,13 +80,23 @@ def send_message(message, agent_url, agent_name):
                 ) as response:
 
                     event_data = json.loads(response.content)
+                    print(event_data)
 
                     for data in event_data:
                         if "content" in data and data["content"].get("parts"):
                             for part in data["content"]["parts"]:
                                 # print(part)
-                                if "text" in part:
-
+                                if (
+                                    "functionResponse" in part
+                                    and part["functionResponse"]["name"]
+                                    == "get_game_info"
+                                ):
+                                    print(
+                                        part["functionResponse"]["response"][
+                                            "game_info_data"
+                                        ]
+                                    )
+                                elif "text" in part:
                                     final_response_text = part["text"]
 
                 # print(final_response_text)
