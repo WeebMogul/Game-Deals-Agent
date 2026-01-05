@@ -33,48 +33,65 @@ def send_message(message, agent_url, agent_name):
         "userId": st.session_state.user_id,
         "sessionId": st.session_state.session_id,
         "newMessage": {"role": "user", "parts": [{"text": message}]},
-        "streaming": True,
     }
     headers = {"Content-Type": "application/json"}
-    full_url = f"{agent_url}/run_sse"
+    full_url = f"{agent_url}/run"
 
     final_response_text = ""
     with st.chat_message("assistant"):
 
-        with requests.post(
-            full_url, headers=headers, json=payload, stream=True
-        ) as response:
-            response.raise_for_status()
+        # with requests.post(
+        #     full_url, headers=headers, json=payload, stream=True
+        # ) as response:
+        #     response.raise_for_status()
 
-            for chunk in response.iter_content(chunk_size=None):
-                lines = chunk.decode("utf-8").splitlines()
+        #     for chunk in response.iter_content(chunk_size=None):
+        #         lines = chunk.decode("utf-8").splitlines()
 
-                for line in lines:
-                    if not line.startswith("data"):
-                        continue
-                    json_data = line[len("data:") :].strip()
+        #         for line in lines:
+        #             if not line.startswith("data"):
+        #                 continue
+        #             json_data = line[len("data:") :].strip()
 
-                    event = json.loads(json_data)
-                    print(event)
+        #             event = json.loads(json_data)
+        #             print(event)
 
-                    if ("content" in event and event["content"].get("parts")) or (
-                        event.get("partial")
-                    ):
-                        for part in event["content"]["parts"]:
+        #             if ("content" in event and event["content"].get("parts")) or (
+        #                 event.get("partial")
+        #             ):
+        #                 for part in event["content"]["parts"]:
 
-                            if "functionCall" in part:
-                                agent_name = part["functionCall"]["name"]
+        #                     if "functionCall" in part:
+        #                         agent_name = part["functionCall"]["name"]
 
-                            elif "text" in part and (
-                                len(final_response_text) != len(part["text"])
-                            ):
-                                final_response_text += part["text"]
-                            #  yield part["text"]
-                            else:
-                                continue
+        #                     elif "text" in part and (
+        #                         len(final_response_text) != len(part["text"])
+        #                     ):
+        #                         final_response_text += part["text"]
+        #                     #  yield part["text"]
+        #                     else:
+        #                         continue
+        with st.container():
+            with st.status(
+                "Grabbing results for your query", state="running"
+            ) as status:
+                with requests.post(
+                    full_url, headers=headers, json=payload, stream=False
+                ) as response:
 
-        # print(final_response_text)
-        st.markdown(final_response_text)
+                    event_data = json.loads(response.content)
+
+                    for data in event_data:
+                        if "content" in data and data["content"].get("parts"):
+                            for part in data["content"]["parts"]:
+                                # print(part)
+                                if "text" in part:
+
+                                    final_response_text = part["text"]
+
+                # print(final_response_text)
+                status.update(label="Got something for", state="complete")
+            st.markdown(final_response_text)
 
     st.session_state.messages.append(
         {"role": "assistant", "content": final_response_text}
