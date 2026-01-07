@@ -1,0 +1,12 @@
+services:
+  game_agent:
+    build: .
+    ports: 
+      - "8000:8000"
+      - "8501:8501"
+    env_file:
+      - .env
+    volumes:
+      - ./app.py:/app/app.py
+      - ./game_agent:/app/game_agent
+    restart: unless-stopped

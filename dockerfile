@@ -1,10 +1,10 @@
 FROM python:3.12.4
 WORKDIR /app
-
-RUN pip install --no-cache-dir \
-    google-adk\
-    python-dotenv\
-    requests
+COPY ./requirements.txt requirements.txt
+RUN pip install -r requirements.txt
 COPY . .
-EXPOSE 80
-CMD ["adk", "api_server","--host", "0.0.0.0", "--port", "80"]
+EXPOSE 8000 8501 
+
+COPY start.sh .
+RUN chmod +x start.sh
+CMD ["./start.sh"]

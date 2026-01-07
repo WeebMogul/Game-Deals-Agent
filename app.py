@@ -73,34 +73,33 @@ def send_message(message, agent_url, agent_name):
         #                         continue
         with st.container():
             with st.status(
-                "Grabbing results for your query", state="running"
+                "Doing things to answer your query", state="running"
             ) as status:
                 with requests.post(
                     full_url, headers=headers, json=payload, stream=False
                 ) as response:
 
                     event_data = json.loads(response.content)
-                    print(event_data)
-
                     for data in event_data:
                         if "content" in data and data["content"].get("parts"):
                             for part in data["content"]["parts"]:
                                 # print(part)
-                                if (
-                                    "functionResponse" in part
-                                    and part["functionResponse"]["name"]
-                                    == "get_game_info"
-                                ):
-                                    print(
-                                        part["functionResponse"]["response"][
-                                            "game_info_data"
-                                        ]
-                                    )
-                                elif "text" in part:
+                                # if (
+                                #     "functionResponse" in part
+                                #     and part["functionResponse"]["name"]
+                                #     == "get_game_info"
+                                # ):
+                                #     print(
+                                #         part["functionResponse"]["response"][
+                                #             "game_info_data"
+                                #         ]
+                                #     )
+                                # el
+                                if "text" in part:
                                     final_response_text = part["text"]
 
                 # print(final_response_text)
-                status.update(label="Got something for", state="complete")
+                status.update(label="Response completed", state="complete")
             st.markdown(final_response_text)
 
     st.session_state.messages.append(
@@ -125,7 +124,7 @@ def create_session(agent_url, agent_name, user_id):
         response.raise_for_status()
         st.session_state.session_id = session_id
         st.session_state.messages = []
-        # st.success(f"New session created: {session_id}")
+        st.success(f"New session created: {session_id}")
         st.rerun()  # Rerun to update the UI immediately
         return True
     except requests.exceptions.RequestException as e:
@@ -141,7 +140,7 @@ if "messages" not in st.session_state:
 if "user_id" not in st.session_state:
     st.session_state.user_id = f"user-{uuid.uuid4()}"
 
-agent_url = "http://localhost:8000"
+agent_url = "http://localhost:8000/"
 agent_name = "game_agent"
 
 if "session_id" not in st.session_state:
