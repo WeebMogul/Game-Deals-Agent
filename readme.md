@@ -58,32 +58,19 @@ An agent built with the purpose of finding your favourite video games on discoun
      ```
 
 6. **Activate the API**
-   There are 2 ways to do this : 
+   You can do this by running 
+   ```bash
+   adk api_server
+   ```
+   and
+   ```bash
+   streamlit run app.py
+   ```
+   in different terminal windows or run it via docker
+   ```bash
+   docker-compose up
+   ```
 
-   1. Through the terminal
-        ```bash
-        # In one terminal window
-        # same directory as of Game-Deals-Agent
-        adk api_server
-        ```
-    2. Through docker 
-        ```bash
-        # with docker activated
-        docker build -t game_agent:latest .
-        docker run -p 80
-        --env_file ./.env
-        game_agent:latest
-        ```
-
-7. **Activate streamlit**
-
-    - In another terminal, on the same directory, run 
-    ```bash
-       streamlit run app.py
-    ```
-
-8. **Access the application**
-   - Open your browser and navigate to `http://localhost:8501`
-   - The Streamlit interface will load automatically
+   You can view the streamlit application
 
 For issues, questions, or contributions, please open an issue on the project repository.
